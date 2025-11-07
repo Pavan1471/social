@@ -19,42 +19,55 @@ export default function LoginPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
+  e.preventDefault()
+  setError(null)
 
-    try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || "Invalid credentials")
-      }
-
-      // Save token and user info
-      localStorage.setItem("token", data.token)
-      localStorage.setItem("user", JSON.stringify(data.user))
-
-      // Redirect to dashboard
-      router.push("/dashboard")
-    } catch (err: any) {
-      setError(err.message)
-    } finally {
-      setIsLoading(false)
-    }
+  // Basic validation
+  if (!formData.email.trim() || !formData.password.trim()) {
+    setError("Please enter both email and password.")
+    return
   }
+
+  setIsLoading(true)
+  try {
+    const res = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      throw new Error(data?.error || "Invalid email or password")
+    }
+
+    if (!data?.token || !data?.user) {
+      throw new Error("Invalid response from server. Please try again.")
+    }
+
+    // Save token and user info
+    localStorage.setItem("token", data.token)
+    localStorage.setItem("role", data.user.role)
+    localStorage.setItem("user", JSON.stringify(data.user))
+
+    // ✅ Redirect only if user role is "store"
+    if (data.user.role === "store") {
+      router.push("/dashboard")
+    } else {
+      router.push("/dashboard/custom-form")
+    }
+  } catch (err: any) {
+    setError(err.message || "Something went wrong. Please try again.")
+  } finally {
+    setIsLoading(false)
+  }
+}
+
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
@@ -67,7 +80,7 @@ export default function LoginPage() {
             </div>
           </div>
           <h1 className="text-2xl font-bold text-foreground">Welcome Back</h1>
-          <p className="text-muted-foreground">Sign in to access your analytics</p>
+          <p className="text-muted-foreground">Sign in to access your dashboard</p>
         </div>
 
         {/* Login Form */}
@@ -103,7 +116,9 @@ export default function LoginPage() {
               />
             </div>
 
-            {error && <p className="text-sm text-red-500">{error}</p>}
+            {error && (
+              <p className="text-sm text-red-500 text-center font-medium">{error}</p>
+            )}
 
             <Button
               type="submit"

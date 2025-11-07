@@ -10,7 +10,7 @@ const menuItems = [
 	{ href: "/dashboard", label: "Dashboard", icon: "📊" },
 	// { href: "/dashboard/social-analytics", label: "Social Media Analytics", icon: "📈" },
 	{ href: "/dashboard/keywords", label: "Keywords", icon: "🔍" },
-	{ href: "/custom-form", label: "Form", icon: "📝" },
+	{ href: "/dashboard/custom-form", label: "Form", icon: "📝" },
 ]
 
 export function DashboardSidebar() {
@@ -18,6 +18,9 @@ export function DashboardSidebar() {
 
 	// Add state to hold the user's display name
 	const [name, setName] = useState<string>("John Doe")
+
+	// Add state to hold the user's role
+	const [role, setRole] = useState<string | null>(null)
 
 	useEffect(() => {
 		try {
@@ -27,10 +30,16 @@ export function DashboardSidebar() {
 				const userName = user?.name ?? user?.fullName ?? user?.firstName ?? user?.username
 				if (userName) setName(userName)
 			}
+			// read role set via localStorage.setItem("role", data.role)
+			const storedRole = localStorage.getItem("role")
+			if (storedRole) setRole(storedRole)
 		} catch (e) {
 			// ignore parse errors
 		}
 	}, [])
+
+	// If role is "customer", show only the custom-form item, otherwise show all
+	const visibleMenuItems = role === "customer" ? menuItems.filter((m) => m.href === "/dashboard/custom-form") : menuItems
 
 	return (
 		<aside className="w-64 bg-sidebar border-r border-sidebar-border h-screen fixed left-0 top-0 flex flex-col">
@@ -49,7 +58,7 @@ export function DashboardSidebar() {
 
 			{/* Navigation Menu */}
 			<nav className="flex-1 p-4 space-y-2">
-				{menuItems.map((item) => {
+				{visibleMenuItems.map((item) => {
 					const isActive = pathname === item.href
 					return (
 						<Link key={item.href} href={item.href}>

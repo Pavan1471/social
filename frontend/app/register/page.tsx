@@ -1,23 +1,27 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 
 export default function RegisterPage() {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     storeName: "",
+    role: "",
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
+  const [error, setError] = useState("")
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
@@ -27,13 +31,38 @@ export default function RegisterPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError("")
+
+    if (!formData.role) {
+      setError("Please select a role.")
+      return
+    }
+
     setIsLoading(true)
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.message || "Registration failed")
+      }
+
+      setIsSuccess(true)
+    } catch (err: any) {
+      setError(err.message || "Something went wrong")
+    } finally {
       setIsLoading(false)
-      // In a real app, redirect to dashboard after successful registration
-      window.location.href = "/dashboard"
-    }, 1000)
+    }
+  }
+
+  const handleSuccessClose = () => {
+    setIsSuccess(false)
+    router.push("/login")
   }
 
   return (
@@ -51,8 +80,9 @@ export default function RegisterPage() {
         </div>
 
         {/* Register Form */}
-        <Card className="bg-card border-border/50 p-6">
+        <Card className="bg-card border border-border/50 p-6 shadow-md">
           <form onSubmit={handleRegister} className="space-y-4">
+            {/* Full Name */}
             <div className="space-y-2">
               <label htmlFor="name" className="text-sm font-medium text-foreground">
                 Full Name
@@ -63,11 +93,11 @@ export default function RegisterPage() {
                 placeholder="John Doe"
                 value={formData.name}
                 onChange={handleChange}
-                className="bg-input border-border/50 text-foreground placeholder:text-muted-foreground"
                 required
               />
             </div>
 
+            {/* Email */}
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium text-foreground">
                 Email
@@ -79,26 +109,47 @@ export default function RegisterPage() {
                 placeholder="your@email.com"
                 value={formData.email}
                 onChange={handleChange}
-                className="bg-input border-border/50 text-foreground placeholder:text-muted-foreground"
                 required
               />
             </div>
 
+            {/* Store Name (shown only if role is store) */}
+            {formData.role !== "customer" && (
+              <div className="space-y-2">
+                <label htmlFor="storeName" className="text-sm font-medium text-foreground">
+                  Store/Brand Name
+                </label>
+                <Input
+                  id="storeName"
+                  name="storeName"
+                  placeholder="Your Store Name"
+                  value={formData.storeName}
+                  onChange={handleChange}
+                  required={formData.role === "store"}
+                />
+              </div>
+            )}
+
+            {/* Role Dropdown */}
             <div className="space-y-2">
-              <label htmlFor="storeName" className="text-sm font-medium text-foreground">
-                Store/Brand Name
+              <label htmlFor="role" className="text-sm font-medium text-foreground">
+                Role
               </label>
-              <Input
-                id="storeName"
-                name="storeName"
-                placeholder="Your Store Name"
-                value={formData.storeName}
+              <select
+                id="role"
+                name="role"
+                value={formData.role}
                 onChange={handleChange}
-                className="bg-input border-border/50 text-foreground placeholder:text-muted-foreground"
+                className="w-full p-2 border border-border/50 rounded-md bg-input text-foreground focus:ring-2 focus:ring-primary focus:outline-none"
                 required
-              />
+              >
+                <option value="">Select your role</option>
+                <option value="store">Store</option>
+                <option value="customer">Customer</option>
+              </select>
             </div>
 
+            {/* Password */}
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium text-foreground">
                 Password
@@ -110,11 +161,14 @@ export default function RegisterPage() {
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
-                className="bg-input border-border/50 text-foreground placeholder:text-muted-foreground"
                 required
               />
             </div>
 
+            {/* Error Message */}
+            {error && <p className="text-sm text-red-500">{error}</p>}
+
+            {/* Submit Button */}
             <Button
               type="submit"
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
@@ -135,6 +189,26 @@ export default function RegisterPage() {
           </p>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {isSuccess && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-card rounded-xl shadow-lg p-6 w-[90%] max-w-sm text-center animate-in fade-in duration-200">
+            <h2 className="text-xl font-semibold text-foreground mb-2">
+              🎉 Registration Successful!
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              Your account has been created successfully.
+            </p>
+            <Button
+              onClick={handleSuccessClose}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              Go to Dashboard
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
