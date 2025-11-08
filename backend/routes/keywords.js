@@ -22,7 +22,7 @@ router.get("/keywords", async (req, res) => {
       ],
       "common_phrases": ["fast delivery", "bad battery", "excellent sound quality"],
       "customer_feedback": [
-        { "author": "string (or Anonymous)", "review": "string", "sentiment": "positive/neutral/negative" }
+        { "author": "customerName", "review": "string", "sentiment": "positive/neutral/negative" }
       ],
       "summary": "Brief summary of what customers liked, disliked, and suggested."
     }

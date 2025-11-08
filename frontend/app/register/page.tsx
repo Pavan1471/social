@@ -14,7 +14,7 @@ export default function RegisterPage() {
     name: "",
     email: "",
     password: "",
-    storeName: "",
+    storeName: "Default Store",
     role: "",
   })
   const [isLoading, setIsLoading] = useState(false)
@@ -114,7 +114,7 @@ export default function RegisterPage() {
             </div>
 
             {/* Store Name (shown only if role is store) */}
-            {formData.role !== "customer" && (
+            {/* {formData.role !== "customer" && (
               <div className="space-y-2">
                 <label htmlFor="storeName" className="text-sm font-medium text-foreground">
                   Store/Brand Name
@@ -128,7 +128,7 @@ export default function RegisterPage() {
                   required={formData.role === "store"}
                 />
               </div>
-            )}
+            )} */}
 
             {/* Role Dropdown */}
             <div className="space-y-2">
@@ -193,21 +193,23 @@ export default function RegisterPage() {
       {/* Success Modal */}
       {isSuccess && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-card rounded-xl shadow-lg p-6 w-[90%] max-w-sm text-center animate-in fade-in duration-200">
-            <h2 className="text-xl font-semibold text-foreground mb-2">
-              🎉 Registration Successful!
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              Your account has been created successfully.
-            </p>
-            <Button
-              onClick={handleSuccessClose}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              Go to Dashboard
-            </Button>
-          </div>
-        </div>
+  <div className="bg-white dark:bg-card rounded-xl shadow-lg p-6 w-[90%] max-w-sm text-center animate-in fade-in duration-200 text-gray-900 dark:text-foreground">
+    <h2 className="text-xl font-semibold mb-2">
+      🎉 Registration Successful!
+    </h2>
+    <p className="text-gray-600 dark:text-muted-foreground mb-6">
+      Your account has been created successfully.
+    </p>
+    <Button
+      onClick={handleSuccessClose}
+      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+    >
+      Go to Login
+    </Button>
+  </div>
+</div>
+
+        // </div>
       )}
     </div>
   )

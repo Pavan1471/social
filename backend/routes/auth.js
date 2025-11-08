@@ -10,7 +10,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'devsecret'
 router.post('/register', async (req, res) => {
   try {
     const { name, email, storeName, password, role } = req.body
-    console.log(req.body)
+
 
     // Validation
     if (!name || !email || !password || !role) {

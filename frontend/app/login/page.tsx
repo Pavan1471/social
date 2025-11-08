@@ -52,6 +52,8 @@ export default function LoginPage() {
 
     // Save token and user info
     localStorage.setItem("token", data.token)
+    // Set token in cookies for middleware protection
+    document.cookie = `token=${data.token}; path=/; secure; samesite=strict`
     localStorage.setItem("role", data.user.role)
     localStorage.setItem("user", JSON.stringify(data.user))
 

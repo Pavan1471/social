@@ -323,6 +323,10 @@ export default function DetailedFeedbackForm() {
               </label>
 
               {/* Purchase Date */}
+              <label className="flex items-center gap-2 col-span-2 text-gray-700">
+                
+                Purchase Date
+              </label>
               <input
                 type="date"
                 name="purchaseDate"
